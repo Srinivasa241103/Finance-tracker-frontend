@@ -1,6 +1,5 @@
 // API Base URL - Change this to your actual backend URL
-//export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:1010';
-export const API_BASE_URL= 'http://localhost:2010';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:2010';
 
 // API Endpoints
 export const API_ENDPOINTS = {

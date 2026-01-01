@@ -25,8 +25,10 @@ import Sidebar from '../components/Sidebar';
 import TopNavigation from '../components/TopNavigation';
 import StatCard from '../components/StatCard';
 import useDashboard from '../hooks/useDashboard';
+import { useSidebar } from '../contexts/SidebarContext';
 
 const Dashboard = () => {
+  const { isCollapsed } = useSidebar();
   const [selectedPeriod, setSelectedPeriod] = useState('thisMonth');
   const { loading, error, data, refresh } = useDashboard(selectedPeriod);
 
@@ -164,7 +166,11 @@ const Dashboard = () => {
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
 
-      <main className="ml-64 flex-1 p-8">
+      <main
+        className={`flex-1 p-8 transition-all duration-300 ease-in-out ${
+          isCollapsed ? 'ml-20' : 'ml-64'
+        }`}
+      >
         <TopNavigation />
 
         {/* Period Selector */}

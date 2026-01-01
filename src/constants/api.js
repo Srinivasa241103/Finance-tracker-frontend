@@ -45,6 +45,36 @@ export const API_ENDPOINTS = {
   CREATE_TRANSACTION: '/transactions/create',
   UPDATE_TRANSACTION: '/transactions/update',
   DELETE_TRANSACTION: '/transactions/delete',
+
+  // Analytics
+  GET_ANALYTICS_OVERVIEW: '/analytics/overview',
+  GET_FINANCIAL_HEALTH: '/analytics/financial-health',
+  GET_INCOME_EXPENSE_TREND: '/analytics/income-expense-trend',
+  GET_CATEGORY_BREAKDOWN: '/analytics/category-breakdown',
+  GET_BUDGET_COMPARISON: '/analytics/budget-comparison',
+  GET_FINANCIAL_PERSONALITY: '/analytics/financial-personality',
+  GET_TOP_MERCHANTS: '/analytics/top-merchants',
+
+  // Savings Goals
+  GET_SAVINGS_GOALS: '/goals',
+  GET_SAVINGS_GOAL: '/goals',
+  CREATE_SAVINGS_GOAL: '/goals/create',
+  UPDATE_SAVINGS_GOAL: '/goals/update',
+  DELETE_SAVINGS_GOAL: '/goals/delete',
+  ADD_CONTRIBUTION: '/goals/contribution',
+  COMPLETE_GOAL: '/goals/complete',
+  GET_GOALS_SUMMARY: '/goals/summary',
+
+  // Settings
+  GET_USER_PROFILE: '/user/profile',
+  UPDATE_USER_PROFILE: '/user/profile/update',
+  CHANGE_PASSWORD: '/user/change-password',
+  UPDATE_NOTIFICATION_SETTINGS: '/user/notifications/update',
+  GET_CONNECTED_ACCOUNTS: '/user/accounts',
+  CONNECT_BANK_ACCOUNT: '/user/accounts/connect',
+  DISCONNECT_BANK_ACCOUNT: '/user/accounts/disconnect',
+  UPDATE_PREFERENCES: '/user/preferences/update',
+  UPLOAD_PROFILE_PHOTO: '/user/profile/photo',
 };
 
 // Storage Keys

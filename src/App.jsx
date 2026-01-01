@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { SidebarProvider } from './contexts/SidebarContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 
@@ -10,12 +11,16 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import Dashboard from './pages/Dashboard';
 import TransactionsPage from './pages/TransactionsPage';
+import AnalyticsPage from './pages/AnalyticsPage';
+import SavingsGoalsPage from './pages/SavingsGoalsPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
+        <SidebarProvider>
+          <Routes>
           {/* Public Routes - Accessible to everyone */}
           <Route path="/" element={<LandingPage />} />
 
@@ -56,9 +61,37 @@ function App() {
             }
           />
 
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <AnalyticsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/goals"
+            element={
+              <ProtectedRoute>
+                <SavingsGoalsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Redirect unknown routes to landing page */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </SidebarProvider>
       </AuthProvider>
     </Router>
   );

@@ -105,7 +105,11 @@ export const transactionsService = {
    */
   updateTransaction: async (id, transactionData) => {
     try {
-      const response = await api.put(`${API_ENDPOINTS.UPDATE_TRANSACTION}/${id}`, transactionData);
+      // Send transaction ID in the request body along with the transaction data
+      const response = await api.post(API_ENDPOINTS.UPDATE_TRANSACTION, {
+        transactionId: id,
+        ...transactionData,
+      });
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;

@@ -1,120 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import savingsGoalsService from '../services/savingsGoals';
 
-// Fallback data when APIs are not available
-const FALLBACK_DATA = {
-  goals: [
-    {
-      _id: '1',
-      name: 'Vacation Fund',
-      description: 'Trip to Bali this summer',
-      currentAmount: 7500,
-      targetAmount: 10000,
-      progress: 75,
-      deadline: '2025-06-30',
-      category: 'vacation',
-      colorClass: 'bg-amber-50',
-      progressColor: 'bg-amber-500',
-      monthlyTarget: 500,
-      onTrack: true,
-      status: 'active',
-    },
-    {
-      _id: '2',
-      name: 'Emergency Fund',
-      description: '6 months of expenses',
-      currentAmount: 4200,
-      targetAmount: 15000,
-      progress: 28,
-      deadline: '2025-12-31',
-      category: 'emergency',
-      colorClass: 'bg-rose-50',
-      progressColor: 'bg-rose-500',
-      monthlyTarget: 900,
-      onTrack: false,
-      status: 'active',
-    },
-    {
-      _id: '3',
-      name: 'New Laptop',
-      description: 'MacBook Pro M3',
-      currentAmount: 890,
-      targetAmount: 2500,
-      progress: 36,
-      deadline: '2025-03-31',
-      category: 'tech',
-      colorClass: 'bg-blue-50',
-      progressColor: 'bg-blue-500',
-      monthlyTarget: 537,
-      onTrack: true,
-      status: 'active',
-    },
-    {
-      _id: '4',
-      name: 'House Down Payment',
-      description: 'First home purchase',
-      currentAmount: 1000,
-      targetAmount: 50000,
-      progress: 2,
-      deadline: '2026-12-31',
-      category: 'home',
-      colorClass: 'bg-emerald-50',
-      progressColor: 'bg-emerald-500',
-      monthlyTarget: 2041,
-      onTrack: false,
-      status: 'active',
-    },
-    {
-      _id: '5',
-      name: 'Professional Course',
-      description: 'AWS Certification',
-      currentAmount: 0,
-      targetAmount: 500,
-      progress: 0,
-      deadline: '2025-04-30',
-      category: 'career',
-      colorClass: 'bg-purple-50',
-      progressColor: 'bg-purple-500',
-      monthlyTarget: 125,
-      onTrack: true,
-      status: 'active',
-    },
-    {
-      _id: '6',
-      name: 'Camera Upgrade',
-      targetAmount: 1200,
-      currentAmount: 1200,
-      status: 'completed',
-      completedDate: '2024-10-15',
-      category: 'tech',
-    },
-    {
-      _id: '7',
-      name: 'Concert Tickets',
-      targetAmount: 300,
-      currentAmount: 300,
-      status: 'completed',
-      completedDate: '2024-09-20',
-      category: 'entertainment',
-    },
-  ],
-  summary: {
-    activeGoals: 5,
-    totalSaved: 13590,
-    averageProgress: 58,
-    completedGoals: 2,
-  },
-};
-
 /**
  * Custom hook for managing savings goals
- * Fetches goals data with fallback to dummy data
  */
 export const useSavingsGoals = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [goals, setGoals] = useState(FALLBACK_DATA.goals);
-  const [summary, setSummary] = useState(FALLBACK_DATA.summary);
+  const [goals, setGoals] = useState([]);
+  const [summary, setSummary] = useState({
+    activeGoals: 0,
+    totalSaved: 0,
+    averageProgress: 0,
+    completedGoals: 0,
+  });
 
   /**
    * Calculate progress percentage
@@ -170,29 +69,39 @@ export const useSavingsGoals = () => {
    * Process goals data from API
    */
   const processGoals = (goalsData) => {
-    return goalsData.map((goal) => {
-      const progress = calculateProgress(goal.currentAmount, goal.targetAmount);
-      const colors = getCategoryColorClass(goal.category);
+    if (!goalsData || !Array.isArray(goalsData)) {
+      console.error('Invalid goals data:', goalsData);
+      return [];
+    }
 
-      if (goal.status === 'completed') {
+    return goalsData.map((goal) => {
+      try {
+        const progress = calculateProgress(goal.currentAmount || 0, goal.targetAmount || 1);
+        const colors = getCategoryColorClass(goal.category);
+
+        if (goal.status === 'completed') {
+          return {
+            ...goal,
+            progress: 100,
+          };
+        }
+
         return {
           ...goal,
-          progress: 100,
+          progress,
+          monthlyTarget: calculateMonthlyTarget(
+            goal.currentAmount || 0,
+            goal.targetAmount || 1,
+            goal.deadline
+          ),
+          onTrack: isOnTrack(goal.currentAmount || 0, goal.targetAmount || 1, goal.deadline),
+          colorClass: colors.bg,
+          progressColor: colors.progress,
         };
+      } catch (err) {
+        console.error('Error processing goal:', goal, err);
+        return goal; // Return unprocessed goal if there's an error
       }
-
-      return {
-        ...goal,
-        progress,
-        monthlyTarget: calculateMonthlyTarget(
-          goal.currentAmount,
-          goal.targetAmount,
-          goal.deadline
-        ),
-        onTrack: isOnTrack(goal.currentAmount, goal.targetAmount, goal.deadline),
-        colorClass: colors.bg,
-        progressColor: colors.progress,
-      };
     });
   };
 
@@ -215,22 +124,25 @@ export const useSavingsGoals = () => {
         const processedGoals = processGoals(goalsResponse.value.goals);
         setGoals(processedGoals);
       } else {
-        console.warn('Goals API failed, using fallback data');
-        setGoals(FALLBACK_DATA.goals);
+        console.warn('Goals API failed, no data available');
+        setGoals([]);
       }
 
       // Process summary data
       if (summaryResponse.status === 'fulfilled' && summaryResponse.value) {
         setSummary(summaryResponse.value);
       } else {
-        console.warn('Goals summary API failed, using fallback data');
-        // Calculate summary from goals
-        const activeGoals = goals.filter((g) => g.status === 'active');
-        const completedGoals = goals.filter((g) => g.status === 'completed');
+        console.warn('Goals summary API failed, calculating from goals');
+        // Calculate summary from the goals we just fetched
+        const currentGoals = goalsResponse.status === 'fulfilled' && goalsResponse.value?.goals
+          ? goalsResponse.value.goals
+          : [];
+        const activeGoals = currentGoals.filter((g) => g.status === 'active');
+        const completedGoals = currentGoals.filter((g) => g.status === 'completed');
         const totalSaved = activeGoals.reduce((sum, g) => sum + (g.currentAmount || 0), 0);
         const avgProgress =
           activeGoals.length > 0
-            ? Math.round(activeGoals.reduce((sum, g) => sum + g.progress, 0) / activeGoals.length)
+            ? Math.round(activeGoals.reduce((sum, g) => sum + (g.progress || 0), 0) / activeGoals.length)
             : 0;
 
         setSummary({
@@ -243,7 +155,13 @@ export const useSavingsGoals = () => {
     } catch (err) {
       setError(err.message || 'Failed to load savings goals');
       console.error('Goals fetch error:', err);
-      // Keep fallback data on error
+      setGoals([]);
+      setSummary({
+        activeGoals: 0,
+        totalSaved: 0,
+        averageProgress: 0,
+        completedGoals: 0,
+      });
     } finally {
       setLoading(false);
     }
@@ -294,10 +212,19 @@ export const useSavingsGoals = () => {
   const addContribution = async (id, amount, note = '') => {
     try {
       const updatedGoal = await savingsGoalsService.addContribution(id, amount, note);
-      await fetchGoals(); // Refresh the list
+
+      // Refresh the list
+      try {
+        await fetchGoals();
+      } catch (fetchErr) {
+        console.error('Error refreshing goals after contribution:', fetchErr);
+        // Don't fail the whole operation if refresh fails
+      }
+
       return { success: true, data: updatedGoal };
     } catch (err) {
-      return { success: false, error: err.message };
+      console.error('Add contribution error:', err);
+      return { success: false, error: err.message || 'Failed to add contribution' };
     }
   };
 

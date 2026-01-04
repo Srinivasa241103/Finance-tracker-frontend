@@ -30,10 +30,8 @@ import {
 import Sidebar from '../components/Sidebar';
 import TopNavigation from '../components/TopNavigation';
 import useAnalytics from '../hooks/useAnalytics';
-import { useSidebar } from '../contexts/SidebarContext';
 
 const AnalyticsPage = () => {
-  const { isCollapsed } = useSidebar();
   const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
 
   const {
@@ -61,11 +59,7 @@ const AnalyticsPage = () => {
     return (
       <div className="min-h-screen bg-slate-50 flex">
         <Sidebar />
-        <main
-          className={`flex-1 p-8 transition-all duration-300 ease-in-out ${
-            isCollapsed ? 'ml-20' : 'ml-64'
-          }`}
-        >
+        <main className="flex-1 p-8 ml-20">
           <TopNavigation />
           <div className="flex items-center justify-center h-96">
             <div className="text-center">
@@ -82,11 +76,7 @@ const AnalyticsPage = () => {
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
 
-      <main
-        className={`flex-1 p-8 transition-all duration-300 ease-in-out ${
-          isCollapsed ? 'ml-20' : 'ml-64'
-        }`}
-      >
+      <main className="flex-1 p-8 ml-20">
         <TopNavigation />
 
         {/* Header */}

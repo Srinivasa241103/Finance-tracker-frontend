@@ -52,11 +52,12 @@ const Sidebar = () => {
 
   return (
     <aside
-      className={`bg-white border-r border-slate-200 fixed h-full transition-all duration-300 ease-in-out ${
-        isCollapsed ? 'w-20' : 'w-64'
+      className={`bg-white border-r border-slate-200 fixed h-full transition-all duration-300 ease-in-out z-50 ${
+        isCollapsed ? 'w-20' : 'w-64 shadow-2xl'
       }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      style={{ top: 0, left: 0 }}
     >
       <div className={`p-6 ${isCollapsed ? 'px-4' : ''}`}>
         {/* Logo */}

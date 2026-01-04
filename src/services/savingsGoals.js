@@ -59,10 +59,16 @@ export const savingsGoalsService = {
    */
   updateSavingsGoal: async (id, goalData) => {
     try {
-      const response = await api.post(API_ENDPOINTS.UPDATE_SAVINGS_GOAL, {
+      // Extract category and rename it to categoryKey
+      const { category, ...restData } = goalData;
+
+      const payload = {
         goalId: id,
-        ...goalData,
-      });
+        ...restData,
+        ...(category && { categoryKey: category }),
+      };
+
+      const response = await api.post(API_ENDPOINTS.UPDATE_SAVINGS_GOAL, payload);
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -76,7 +82,9 @@ export const savingsGoalsService = {
    */
   deleteSavingsGoal: async (id) => {
     try {
-      const response = await api.delete(`${API_ENDPOINTS.DELETE_SAVINGS_GOAL}/${id}`);
+      const response = await api.post(API_ENDPOINTS.DELETE_SAVINGS_GOAL, {
+        goalId: id,
+      });
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;
@@ -92,13 +100,18 @@ export const savingsGoalsService = {
    */
   addContribution: async (id, amount, note = '') => {
     try {
-      const response = await api.post(API_ENDPOINTS.ADD_CONTRIBUTION, {
+      const payload = {
         goalId: id,
-        amount,
-        note,
-      });
+        note: note || '',
+        amount: Number(amount),
+      };
+
+      console.log('Adding contribution with payload:', payload);
+
+      const response = await api.post(API_ENDPOINTS.ADD_CONTRIBUTION, payload);
       return response.data;
     } catch (error) {
+      console.error('Add contribution error:', error.response?.data || error.message);
       throw error.response?.data || error.message;
     }
   },

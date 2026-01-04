@@ -7,7 +7,6 @@ import {
   DollarSign,
   Edit,
   Trash2,
-  CheckCircle,
   X,
   Plane,
   Home,
@@ -16,14 +15,15 @@ import {
   Briefcase,
   AlertCircle,
   Music,
+  Check,
 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import TopNavigation from '../components/TopNavigation';
 import useSavingsGoals from '../hooks/useSavingsGoals';
-import { useSidebar } from '../contexts/SidebarContext';
+import { OnTrackBadge, CompletedCheckmark } from '../components/CustomCheckmark';
+import './SavingsGoalsPage.css';
 
 const SavingsGoalsPage = () => {
-  const { isCollapsed } = useSidebar();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -40,6 +40,7 @@ const SavingsGoalsPage = () => {
   });
   const [contributionAmount, setContributionAmount] = useState('');
   const [contributionNote, setContributionNote] = useState('');
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const {
     loading,
@@ -119,7 +120,8 @@ const SavingsGoalsPage = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    const result = await updateGoal(selectedGoal._id, {
+    const goalId = selectedGoal?.goalId || selectedGoal?.id || selectedGoal?._id;
+    const result = await updateGoal(goalId, {
       ...formData,
       targetAmount: parseFloat(formData.targetAmount),
       currentAmount: parseFloat(formData.currentAmount),
@@ -148,7 +150,8 @@ const SavingsGoalsPage = () => {
   };
 
   const handleDeleteConfirm = async () => {
-    const result = await deleteGoal(selectedGoal._id);
+    const goalId = selectedGoal?.goalId || selectedGoal?.id || selectedGoal?._id;
+    const result = await deleteGoal(goalId);
 
     if (result.success) {
       setShowDeleteModal(false);
@@ -167,8 +170,22 @@ const SavingsGoalsPage = () => {
 
   const handleContributionSubmit = async (e) => {
     e.preventDefault();
+
+    // Get the goal ID - handle different possible field names
+    const goalId = selectedGoal?.goalId || selectedGoal?.id || selectedGoal?._id;
+
+    console.log('Selected goal:', selectedGoal);
+    console.log('Goal ID:', goalId);
+    console.log('Contribution amount:', parseFloat(contributionAmount));
+    console.log('Contribution note:', contributionNote);
+
+    if (!goalId) {
+      alert('Error: Goal ID not found');
+      return;
+    }
+
     const result = await addContribution(
-      selectedGoal._id,
+      goalId,
       parseFloat(contributionAmount),
       contributionNote
     );
@@ -178,6 +195,14 @@ const SavingsGoalsPage = () => {
       setSelectedGoal(null);
       setContributionAmount('');
       setContributionNote('');
+
+      // Show success toast
+      setShowSuccessToast(true);
+
+      // Auto-hide after 3 seconds
+      setTimeout(() => {
+        setShowSuccessToast(false);
+      }, 3000);
     } else {
       alert('Failed to add contribution: ' + result.error);
     }
@@ -192,18 +217,18 @@ const SavingsGoalsPage = () => {
     }
   };
 
-  const activeGoals = goals.filter((goal) => goal.status === 'active');
-  const completedGoals = goals.filter((goal) => goal.status === 'completed');
+  const activeGoals = Array.isArray(goals) ? goals.filter((goal) => goal?.status === 'active') : [];
+  const completedGoals = Array.isArray(goals) ? goals.filter((goal) => goal?.status === 'completed') : [];
+
+  console.log('Goals state:', goals);
+  console.log('Active goals:', activeGoals);
+  console.log('Completed goals:', completedGoals);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex">
         <Sidebar />
-        <main
-          className={`flex-1 p-8 transition-all duration-300 ease-in-out ${
-            isCollapsed ? 'ml-20' : 'ml-64'
-          }`}
-        >
+        <main className="flex-1 p-8 ml-20">
           <TopNavigation />
           <div className="flex items-center justify-center h-96">
             <div className="text-center">
@@ -216,15 +241,27 @@ const SavingsGoalsPage = () => {
     );
   }
 
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex">
+        <Sidebar />
+        <main className="flex-1 p-8 ml-20">
+          <TopNavigation />
+          <div className="bg-rose-50 border border-rose-200 rounded-lg p-6 mt-8">
+            <h3 className="text-rose-900 font-semibold mb-2">Error Loading Goals</h3>
+            <p className="text-rose-700">{error}</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
 
-      <main
-        className={`flex-1 p-8 transition-all duration-300 ease-in-out ${
-          isCollapsed ? 'ml-20' : 'ml-64'
-        }`}
-      >
+      <main className="flex-1 p-8 ml-20">
         <TopNavigation />
 
         {/* Header */}
@@ -293,16 +330,32 @@ const SavingsGoalsPage = () => {
         <div className="mb-8">
           <h2 className="text-xl font-bold text-slate-900 mb-6">Active Goals</h2>
           {activeGoals.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-              <Target className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-600 text-lg mb-2">No active goals yet</p>
-              <p className="text-slate-500">Create your first savings goal to get started!</p>
+            <div className="bg-white rounded-xl border-2 border-dashed border-slate-300 p-16 text-center">
+              <div className="max-w-md mx-auto">
+                <Target className="w-20 h-20 text-slate-400 mx-auto mb-6" />
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">No Goals Yet</h3>
+                <p className="text-slate-600 mb-6">
+                  You don't have any savings goals yet. Please add a goal to start tracking your financial milestones!
+                </p>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="inline-flex items-center space-x-2 bg-slate-900 text-white px-8 py-3 rounded-lg hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl font-medium"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>Create Your First Goal</span>
+                </button>
+              </div>
             </div>
           ) : (
             <div className="grid lg:grid-cols-2 gap-6">
-              {activeGoals.map((goal) => (
+              {activeGoals.map((goal) => {
+                if (!goal) return null;
+                const goalId = goal?.goalId || goal?.id || goal?._id;
+                if (!goalId) return null;
+
+                return (
                 <div
-                  key={goal._id}
+                  key={goalId}
                   className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg transition-shadow"
                 >
                   {/* Header */}
@@ -313,8 +366,8 @@ const SavingsGoalsPage = () => {
                           {getCategoryIcon(goal.category)}
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-slate-900">{goal.name}</h3>
-                          <p className="text-sm text-slate-600 mt-1">{goal.description}</p>
+                          <h3 className="text-xl font-bold text-slate-900">{goal.name || 'Unnamed Goal'}</h3>
+                          <p className="text-sm text-slate-600 mt-1">{goal.description || ''}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -372,19 +425,14 @@ const SavingsGoalsPage = () => {
                         <Calendar className="w-4 h-4" />
                         <span>Due {formatDate(goal.deadline)}</span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        {goal.onTrack ? (
-                          <>
-                            <CheckCircle className="w-4 h-4 text-emerald-600" />
-                            <span className="text-emerald-600 font-medium">On track</span>
-                          </>
-                        ) : (
-                          <>
-                            <AlertCircle className="w-4 h-4 text-amber-600" />
-                            <span className="text-amber-600 font-medium">Needs attention</span>
-                          </>
-                        )}
-                      </div>
+                      {goal.onTrack ? (
+                        <OnTrackBadge />
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <AlertCircle className="w-4 h-4 text-amber-600" />
+                          <span className="text-amber-600 font-medium">Needs attention</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Monthly Contribution */}
@@ -401,13 +449,13 @@ const SavingsGoalsPage = () => {
                     <div className="flex space-x-3 mt-4">
                       <button
                         onClick={() => handleContributionClick(goal)}
-                        className="flex-1 py-3 border-2 border-slate-200 rounded-lg text-slate-700 hover:border-slate-900 hover:text-slate-900 transition-all font-medium"
+                        className="flex-1 py-3 border-2 border-slate-200 rounded-lg text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-200 font-medium"
                       >
                         Add Contribution
                       </button>
                       {goal.progress >= 100 && (
                         <button
-                          onClick={() => handleCompleteGoal(goal._id)}
+                          onClick={() => handleCompleteGoal(goalId)}
                           className="flex-1 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-medium"
                         >
                           Mark Complete
@@ -416,7 +464,8 @@ const SavingsGoalsPage = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -426,25 +475,29 @@ const SavingsGoalsPage = () => {
           <div>
             <h2 className="text-xl font-bold text-slate-900 mb-6">Completed Goals</h2>
             <div className="grid md:grid-cols-3 gap-6">
-              {completedGoals.map((goal) => (
-                <div key={goal._id} className="bg-white rounded-xl border border-slate-200 p-6">
+              {completedGoals.map((goal) => {
+                if (!goal) return null;
+                const goalId = goal?.goalId || goal?.id || goal?._id;
+                if (!goalId) return null;
+
+                return (
+                <div key={goalId} className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
-                      <CheckCircle className="w-6 h-6 text-emerald-600" />
-                    </div>
+                    <CompletedCheckmark />
                     <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
                       Completed
                     </span>
                   </div>
-                  <h3 className="font-bold text-slate-900 mb-1">{goal.name}</h3>
+                  <h3 className="font-bold text-slate-900 mb-1">{goal.name || 'Unnamed Goal'}</h3>
                   <div className="text-2xl font-bold text-slate-900 mb-2">
                     ₹{goal.targetAmount?.toLocaleString() || 0}
                   </div>
                   <div className="text-sm text-slate-500">
-                    Completed on {new Date(goal.completedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    Completed on {goal.completedDate ? new Date(goal.completedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -836,6 +889,21 @@ const SavingsGoalsPage = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Success Toast Notification */}
+      {showSuccessToast && (
+        <div className="fixed bottom-8 right-8 z-50 animate-slide-up">
+          <div className="bg-emerald-600 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center space-x-3 min-w-[320px]">
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center animate-scale-in">
+              <Check className="w-5 h-5 text-white" strokeWidth={3} />
+            </div>
+            <div>
+              <p className="font-semibold">Contribution Added!</p>
+              <p className="text-sm text-emerald-100">Your savings goal has been updated.</p>
+            </div>
           </div>
         </div>
       )}

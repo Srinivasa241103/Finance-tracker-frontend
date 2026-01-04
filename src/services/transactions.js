@@ -123,7 +123,9 @@ export const transactionsService = {
    */
   deleteTransaction: async (id) => {
     try {
-      const response = await api.delete(`${API_ENDPOINTS.DELETE_TRANSACTION}/${id}`);
+      const response = await api.post(API_ENDPOINTS.DELETE_TRANSACTION, {
+        transactionId: id,
+      });
       return response.data;
     } catch (error) {
       throw error.response?.data || error.message;

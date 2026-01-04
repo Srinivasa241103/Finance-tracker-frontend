@@ -25,16 +25,16 @@ import {
 import Sidebar from '../components/Sidebar';
 import TopNavigation from '../components/TopNavigation';
 import useTransactions from '../hooks/useTransactions';
-import { useSidebar } from '../contexts/SidebarContext';
+import './TransactionsPage.css';
 
 const TransactionsPage = () => {
-  const { isCollapsed } = useSidebar();
   const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [showActionMenu, setShowActionMenu] = useState(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [selectedCurrency, setSelectedCurrency] = useState('INR');
   const [exchangeRate, setExchangeRate] = useState(83.5); // Default USD to INR rate
@@ -300,6 +300,14 @@ const TransactionsPage = () => {
     if (result.success) {
       setShowDeleteModal(false);
       setSelectedTransaction(null);
+
+      // Show success toast
+      setShowSuccessToast(true);
+
+      // Auto-hide after 3 seconds
+      setTimeout(() => {
+        setShowSuccessToast(false);
+      }, 3000);
     } else {
       alert('Failed to delete transaction: ' + result.error);
     }
@@ -327,11 +335,7 @@ const TransactionsPage = () => {
     return (
       <div className="min-h-screen bg-slate-50 flex">
         <Sidebar />
-        <main
-          className={`flex-1 p-8 flex items-center justify-center transition-all duration-300 ease-in-out ${
-            isCollapsed ? 'ml-20' : 'ml-64'
-          }`}
-        >
+        <main className="flex-1 p-8 flex items-center justify-center ml-20">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900 mb-4"></div>
             <p className="text-slate-600">Loading transactions...</p>
@@ -345,11 +349,7 @@ const TransactionsPage = () => {
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
 
-      <main
-        className={`flex-1 p-8 transition-all duration-300 ease-in-out ${
-          isCollapsed ? 'ml-20' : 'ml-64'
-        }`}
-      >
+      <main className="flex-1 p-8 ml-20">
         <TopNavigation />
 
         {/* Header */}
@@ -1205,6 +1205,21 @@ const TransactionsPage = () => {
               >
                 Delete
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Toast Notification */}
+      {showSuccessToast && (
+        <div className="fixed bottom-8 right-8 z-50 animate-slide-up">
+          <div className="bg-emerald-600 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center space-x-3 min-w-[320px]">
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center animate-scale-in">
+              <Check className="w-5 h-5 text-white" strokeWidth={3} />
+            </div>
+            <div>
+              <p className="font-semibold">Transaction Deleted!</p>
+              <p className="text-sm text-emerald-100">The transaction was successfully removed.</p>
             </div>
           </div>
         </div>

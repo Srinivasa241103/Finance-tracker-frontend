@@ -8,6 +8,20 @@ import { API_ENDPOINTS } from '../constants/api';
 
 export const dashboardService = {
   /**
+   * Get complete dashboard overview (health score, stats, alerts, transactions, goals)
+   * @returns {Promise} Complete dashboard data
+   */
+  getDashboardOverview: async () => {
+    try {
+      const response = await api.get(API_ENDPOINTS.GET_DASHBOARD_OVERVIEW);
+      // Backend returns { success, message, data }, we need the nested data
+      return response.data.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
    * Get dashboard statistics (balance, income, expenses, etc.)
    * @param {string} period - Time period (e.g., 'thisMonth', 'lastMonth', 'thisYear')
    * @returns {Promise} Dashboard stats
@@ -15,6 +29,48 @@ export const dashboardService = {
   getDashboardStats: async (period = 'thisMonth') => {
     try {
       const response = await api.get(API_ENDPOINTS.GET_DASHBOARD_STATS, {
+        params: { period },
+      });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
+   * Get financial health score
+   * @returns {Promise} Health score data
+   */
+  getHealthScore: async () => {
+    try {
+      const response = await api.get(API_ENDPOINTS.GET_HEALTH_SCORE);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
+   * Get dashboard alerts and milestones
+   * @returns {Promise} Alerts data
+   */
+  getAlerts: async () => {
+    try {
+      const response = await api.get(API_ENDPOINTS.GET_ALERTS);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
+   * Get top spending categories
+   * @param {string} period - Time period
+   * @returns {Promise} Top categories data
+   */
+  getTopCategories: async (period = 'thisMonth') => {
+    try {
+      const response = await api.get(API_ENDPOINTS.GET_TOP_CATEGORIES, {
         params: { period },
       });
       return response.data;

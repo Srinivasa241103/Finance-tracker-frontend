@@ -7,6 +7,7 @@ import {
   BarChart3,
   Target,
   CreditCard,
+  Wallet,
 } from 'lucide-react';
 import { useSidebar } from '../contexts/SidebarContext';
 
@@ -25,6 +26,12 @@ const Sidebar = () => {
       name: 'Transactions',
       path: '/transactions',
       icon: Receipt,
+      disabled: false,
+    },
+    {
+      name: 'My Budget',
+      path: '/budget',
+      icon: Wallet,
       disabled: false,
     },
     {

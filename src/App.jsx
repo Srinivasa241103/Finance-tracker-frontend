@@ -11,6 +11,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import Dashboard from './pages/Dashboard';
 import TransactionsPage from './pages/TransactionsPage';
+import Budget from './pages/Budget';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SavingsGoalsPage from './pages/SavingsGoalsPage';
 import SettingsPage from './pages/SettingsPage';
@@ -57,6 +58,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <TransactionsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/budget"
+            element={
+              <ProtectedRoute>
+                <Budget />
               </ProtectedRoute>
             }
           />

@@ -34,10 +34,14 @@ export const API_ENDPOINTS = {
   DELETE_GOAL: '/goals',
 
   // Dashboard
+  GET_DASHBOARD_OVERVIEW: '/dashboard/overview',
   GET_DASHBOARD_STATS: '/dashboard/stats',
   GET_SPENDING_TREND: '/dashboard/spending-trend',
   GET_CATEGORY_BREAKDOWN: '/dashboard/category-breakdown',
   GET_RECENT_TRANSACTIONS: '/dashboard/recent-transactions',
+  GET_HEALTH_SCORE: '/dashboard/health-score',
+  GET_ALERTS: '/dashboard/alerts',
+  GET_TOP_CATEGORIES: '/dashboard/top-categories',
 
   // Transactions
   GET_TRANSACTIONS: '/transactions',
@@ -64,6 +68,16 @@ export const API_ENDPOINTS = {
   ADD_CONTRIBUTION: '/goals/contribution',
   COMPLETE_GOAL: '/goals/complete',
   GET_GOALS_SUMMARY: '/goals/summary',
+
+  // Budgets
+  GET_BUDGETS: '/budgets',
+  GET_BUDGET: '/budgets',
+  CREATE_BUDGET: '/budgets/create',
+  UPDATE_BUDGET: '/budgets/update',
+  DELETE_BUDGET: '/budgets/delete',
+  GET_BUDGET_SUMMARY: '/budgets/summary',
+  GET_BUDGET_PROGRESS: '/budgets/progress',
+  GET_BUDGET_ALERTS: '/budgets/alerts',
 
   // Settings
   GET_USER_PROFILE: '/user/profile',

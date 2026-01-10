@@ -14,6 +14,7 @@ import TransactionsPage from './pages/TransactionsPage';
 import Budget from './pages/Budget';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SavingsGoalsPage from './pages/SavingsGoalsPage';
+import BanksPage from './pages/BanksPage';
 import SettingsPage from './pages/SettingsPage';
 
 function App() {
@@ -85,6 +86,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <SavingsGoalsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/banks"
+            element={
+              <ProtectedRoute>
+                <BanksPage />
               </ProtectedRoute>
             }
           />

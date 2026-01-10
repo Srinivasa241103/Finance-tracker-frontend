@@ -12,12 +12,17 @@ import {
   X,
   Check,
   AlertTriangle,
+  Clock,
+  Sparkles,
 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import TopNavigation from '../components/TopNavigation';
 import useBudget from '../hooks/useBudget';
 
 const Budget = () => {
+  // Temporarily disabled - showing coming soon message
+  const COMING_SOON = true;
+
   const { loading, error, budgets, summary, progress, alerts, refresh, createBudget, updateBudget, deleteBudget } = useBudget();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -168,6 +173,82 @@ const Budget = () => {
             >
               Retry
             </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Coming Soon UI
+  if (COMING_SOON) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex">
+        <Sidebar />
+
+        <main className="flex-1 p-8 ml-20">
+          <TopNavigation />
+
+          {/* Coming Soon Content */}
+          <div className="flex items-center justify-center min-h-[calc(100vh-120px)]">
+            <div className="text-center max-w-md">
+              {/* Icon */}
+              <div className="relative inline-block mb-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-slate-900 to-slate-700 rounded-2xl flex items-center justify-center shadow-xl">
+                  <Wallet className="w-12 h-12 text-white" />
+                </div>
+                <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-2 shadow-lg">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h1 className="text-4xl font-bold text-slate-900 mb-3">
+                Budget Management
+              </h1>
+
+              {/* Coming Soon Badge */}
+              <div className="inline-flex items-center space-x-2 bg-slate-900 text-white px-4 py-2 rounded-full mb-6">
+                <Clock className="w-4 h-4" />
+                <span className="text-sm font-medium">Coming Soon</span>
+              </div>
+              {/* Features List */}
+              <div className="bg-white border border-slate-200 rounded-xl p-6 text-left mb-8">
+                <h3 className="font-semibold text-slate-900 mb-4 text-sm uppercase tracking-wide">
+                  Upcoming Features
+                </h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start space-x-3">
+                    <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-3 h-3 text-emerald-600" />
+                    </div>
+                    <span className="text-slate-600 text-sm">Set monthly budget limits for each category</span>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-3 h-3 text-emerald-600" />
+                    </div>
+                    <span className="text-slate-600 text-sm">Real-time tracking of your spending progress</span>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-3 h-3 text-emerald-600" />
+                    </div>
+                    <span className="text-slate-600 text-sm">Smart alerts when approaching budget limits</span>
+                  </li>
+                  <li className="flex items-start space-x-3">
+                    <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Check className="w-3 h-3 text-emerald-600" />
+                    </div>
+                    <span className="text-slate-600 text-sm">Visual progress bars and spending insights</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* CTA */}
+              <p className="text-slate-500 text-sm">
+                Stay tuned for updates!
+              </p>
+            </div>
           </div>
         </main>
       </div>

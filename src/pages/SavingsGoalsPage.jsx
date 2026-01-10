@@ -333,16 +333,16 @@ const SavingsGoalsPage = () => {
             <div className="bg-white rounded-xl border-2 border-dashed border-slate-300 p-16 text-center">
               <div className="max-w-md mx-auto">
                 <Target className="w-20 h-20 text-slate-400 mx-auto mb-6" />
-                <h3 className="text-2xl font-bold text-slate-900 mb-3">No Goals Yet</h3>
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">No Active Goals</h3>
                 <p className="text-slate-600 mb-6">
-                  You don't have any savings goals yet. Please add a goal to start tracking your financial milestones!
+                  You don't have any active savings goals. Please add a goal to start tracking your financial milestones!
                 </p>
                 <button
                   onClick={() => setShowAddModal(true)}
                   className="inline-flex items-center space-x-2 bg-slate-900 text-white px-8 py-3 rounded-lg hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl font-medium"
                 >
                   <Plus className="w-5 h-5" />
-                  <span>Create Your First Goal</span>
+                  <span>Create Your Goal</span>
                 </button>
               </div>
             </div>
@@ -728,7 +728,9 @@ const SavingsGoalsPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Target Date</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Target Date <span className="text-slate-400 text-xs">(Optional)</span>
+                </label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input
@@ -736,7 +738,6 @@ const SavingsGoalsPage = () => {
                     value={formData.deadline}
                     onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
                     className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"
-                    required
                   />
                 </div>
               </div>

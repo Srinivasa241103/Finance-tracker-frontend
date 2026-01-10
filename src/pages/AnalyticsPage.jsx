@@ -6,6 +6,7 @@ import {
   AlertCircle,
   CheckCircle,
   Target,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -80,7 +81,7 @@ const AnalyticsPage = () => {
         <TopNavigation />
 
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-slate-900">Analytics & Insights</h1>
@@ -111,6 +112,22 @@ const AnalyticsPage = () => {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* Dummy Data Caution Banner */}
+        <div className="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4 mb-6 shadow-sm">
+          <div className="flex items-start space-x-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="text-amber-900 font-semibold text-sm mb-1">
+                Viewing Sample Data
+              </h3>
+              <p className="text-amber-800 text-sm">
+                You are currently viewing dummy data for demonstration purposes.
+                The analytics shown below are sample insights and do not reflect backend data.
+              </p>
             </div>
           </div>
         </div>

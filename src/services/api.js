@@ -37,10 +37,18 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
+      // Check if the error is related to session/token expiration from middleware
+      const errorMessage = error.response?.data?.message;
+      const isSessionExpired = errorMessage === 'Session expired or invalid. Please login again.' ||
+                               errorMessage === 'Access token has expired.' ||
+                               errorMessage === 'Invalid access token.' ||
+                               errorMessage === 'Access denied. No token provided.';
+
       try {
         const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
 
-        if (refreshToken) {
+        // Only attempt refresh if we have a refresh token and it's not a session expired error
+        if (refreshToken && !isSessionExpired) {
           // Try to refresh the token
           const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
             refreshToken,
@@ -52,6 +60,13 @@ apiClient.interceptors.response.use(
           // Retry the original request with new token
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return apiClient(originalRequest);
+        } else {
+          // Session expired or no refresh token, logout user
+          localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+          window.location.href = '/login';
+          return Promise.reject(error);
         }
       } catch (refreshError) {
         // If refresh fails, logout user

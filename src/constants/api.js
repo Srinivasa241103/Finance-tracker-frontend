@@ -89,6 +89,16 @@ export const API_ENDPOINTS = {
   DISCONNECT_BANK_ACCOUNT: '/user/accounts/disconnect',
   UPDATE_PREFERENCES: '/user/preferences/update',
   UPLOAD_PROFILE_PHOTO: '/user/profile/photo',
+
+  // Plaid - Bank Account Integration
+  CREATE_PLAID_LINK_TOKEN: '/plaid/create-link-token',
+  EXCHANGE_PLAID_PUBLIC_TOKEN: '/plaid/exchange-public-token',
+  GET_BANK_ACCOUNTS: '/plaid/accounts',
+  GET_BANK_ACCOUNT: '/plaid/accounts',
+  REMOVE_BANK_ACCOUNT: '/plaid/accounts/remove',
+  SYNC_BANK_ACCOUNT: '/plaid/accounts/sync',
+  GET_ACCOUNT_BALANCE: '/plaid/accounts/balance',
+  REFRESH_ALL_ACCOUNTS: '/plaid/accounts/refresh-all',
 };
 
 // Storage Keys

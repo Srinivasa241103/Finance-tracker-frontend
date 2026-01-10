@@ -48,10 +48,9 @@ const Sidebar = () => {
     },
     {
       name: 'Bank Accounts',
-      path: '/accounts',
+      path: '/banks',
       icon: CreditCard,
-      disabled: true,
-      comingSoon: true,
+      disabled: false,
     },
   ];
 

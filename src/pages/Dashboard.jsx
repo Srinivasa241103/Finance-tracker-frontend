@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Wallet,
   ArrowUpRight,
@@ -11,14 +12,133 @@ import {
   Award,
   Calendar,
   Bell,
+  X,
+  Plane,
+  Home,
+  Laptop,
+  Heart,
+  Briefcase,
+  Music,
 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import TopNavigation from '../components/TopNavigation';
 import StatCard from '../components/StatCard';
 import useDashboard from '../hooks/useDashboard';
+import savingsGoalsService from '../services/savingsGoals';
 
 const Dashboard = () => {
-  const { loading, error, data, refresh } = useDashboard();
+  const navigate = useNavigate();
+  const { loading, error, data, refresh, createGoal } = useDashboard();
+  const [showAddGoalModal, setShowAddGoalModal] = useState(false);
+  const [showContributionModal, setShowContributionModal] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [contributionAmount, setContributionAmount] = useState('');
+  const [contributionNote, setContributionNote] = useState('');
+  const [goalFormData, setGoalFormData] = useState({
+    name: '',
+    targetAmount: '',
+    currentAmount: '',
+    deadline: '',
+    category: '',
+    description: '',
+  });
+
+  // Category options for goals
+  const goalCategories = [
+    { icon: Plane, value: 'vacation', label: 'Travel' },
+    { icon: Heart, value: 'emergency', label: 'Emergency' },
+    { icon: Laptop, value: 'tech', label: 'Tech' },
+    { icon: Home, value: 'home', label: 'Home' },
+    { icon: Briefcase, value: 'career', label: 'Career' },
+    { icon: Music, value: 'entertainment', label: 'Fun' },
+  ];
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    setGoalFormData({ ...goalFormData, category });
+  };
+
+  const handleAddGoalSubmit = async (e) => {
+    e.preventDefault();
+    const result = await createGoal({
+      ...goalFormData,
+      targetAmount: parseFloat(goalFormData.targetAmount),
+      currentAmount: parseFloat(goalFormData.currentAmount || 0),
+    });
+
+    if (result.success) {
+      setShowAddGoalModal(false);
+      setGoalFormData({
+        name: '',
+        targetAmount: '',
+        currentAmount: '',
+        deadline: '',
+        category: '',
+        description: '',
+      });
+      setSelectedCategory('');
+      refresh(); // Refresh dashboard data
+    } else {
+      alert('Failed to create goal: ' + result.error);
+    }
+  };
+
+  const closeGoalModal = () => {
+    setShowAddGoalModal(false);
+    setGoalFormData({
+      name: '',
+      targetAmount: '',
+      currentAmount: '',
+      deadline: '',
+      category: '',
+      description: '',
+    });
+    setSelectedCategory('');
+  };
+
+  const handleContributionClick = (goal) => {
+    setSelectedGoal(goal);
+    setContributionAmount('');
+    setContributionNote('');
+    setShowContributionModal(true);
+  };
+
+  const handleContributionSubmit = async (e) => {
+    e.preventDefault();
+
+    const goalId = selectedGoal?.goalId || selectedGoal?.id || selectedGoal?._id;
+
+    if (!goalId) {
+      alert('Error: Goal ID not found');
+      return;
+    }
+
+    try {
+      const response = await savingsGoalsService.addContribution(
+        goalId,
+        parseFloat(contributionAmount),
+        contributionNote
+      );
+
+      if (response) {
+        setShowContributionModal(false);
+        setSelectedGoal(null);
+        setContributionAmount('');
+        setContributionNote('');
+        refresh(); // Refresh dashboard data
+      }
+    } catch (err) {
+      alert('Failed to add contribution: ' + err.message);
+    }
+  };
+
+  const closeContributionModal = () => {
+    setShowContributionModal(false);
+    setSelectedGoal(null);
+    setContributionAmount('');
+    setContributionNote('');
+  };
 
   if (loading) {
     return (
@@ -89,7 +209,10 @@ const Dashboard = () => {
                   </div>
                 </div>
               </div>
-              <button className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-lg transition-colors border border-white/20 text-sm font-medium">
+              <button
+                onClick={() => navigate('/analytics')}
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-lg transition-colors border border-white/20 text-sm font-medium"
+              >
                 View Full Analysis →
               </button>
             </div>
@@ -135,7 +258,12 @@ const Dashboard = () => {
                 <Bell className="w-5 h-5 text-slate-600" />
                 <span>Alerts & Milestones</span>
               </h3>
-              <button className="text-sm text-slate-600 hover:text-slate-900">View All</button>
+              <button
+                onClick={() => navigate('/analytics')}
+                className="text-sm text-slate-600 hover:text-slate-900"
+              >
+                View All
+              </button>
             </div>
             <div className="space-y-3">
               {alerts.slice(0, 3).map((alert) => (
@@ -154,7 +282,10 @@ const Dashboard = () => {
                     <p className="text-sm font-semibold text-slate-900">{alert.title}</p>
                     <p className="text-xs text-slate-600 mt-0.5">{alert.description}</p>
                   </div>
-                  <button className="text-xs text-slate-600 hover:text-slate-900 font-medium">
+                  <button
+                    onClick={() => alert.actionLink && navigate(alert.actionLink)}
+                    className="text-xs text-slate-600 hover:text-slate-900 font-medium"
+                  >
                     View →
                   </button>
                 </div>
@@ -272,7 +403,10 @@ const Dashboard = () => {
           <div className="lg:col-span-2 bg-white rounded-xl p-6 border border-slate-200">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-slate-900">Recent Transactions</h2>
-              <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+              <button
+                onClick={() => navigate('/transactions')}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
                 View All →
               </button>
             </div>
@@ -324,7 +458,10 @@ const Dashboard = () => {
           <div className="bg-white rounded-xl p-6 border border-slate-200">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-slate-900">Top Spending</h2>
-              <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+              <button
+                onClick={() => navigate('/analytics')}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              >
                 See Breakdown →
               </button>
             </div>
@@ -370,7 +507,10 @@ const Dashboard = () => {
               <Target className="w-5 h-5 text-slate-600" />
               <span>Priority Savings Goals</span>
             </h2>
-            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+            <button
+              onClick={() => navigate('/goals')}
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
               Manage All Goals →
             </button>
           </div>
@@ -395,17 +535,21 @@ const Dashboard = () => {
                     <span className="text-slate-600">₹{goal.current?.toLocaleString() || 0}</span>
                     <span className="text-slate-900 font-semibold">₹{goal.target?.toLocaleString() || 0}</span>
                   </div>
-                  {goal.daysRemaining && (
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-3">
+                    {goal.daysRemaining && (
                       <span className="text-xs text-slate-500">
                         <Calendar className="w-3 h-3 inline mr-1" />
                         {goal.daysRemaining} days remaining
                       </span>
-                      <button className="text-xs bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded font-medium transition-colors">
-                        Contribute
-                      </button>
-                    </div>
-                  )}
+                    )}
+                    {!goal.daysRemaining && <span></span>}
+                    <button
+                      onClick={() => handleContributionClick(goal)}
+                      className="text-xs bg-slate-900 hover:bg-slate-800 text-white px-3 py-1.5 rounded font-medium transition-colors"
+                    >
+                      Contribute
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -414,7 +558,10 @@ const Dashboard = () => {
               <Target className="w-12 h-12 text-slate-300 mx-auto mb-3" />
               <p className="text-slate-500 mb-1">No savings goals yet</p>
               <p className="text-slate-400 text-sm mb-4">Create your first goal to start saving</p>
-              <button className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium inline-flex items-center space-x-2">
+              <button
+                onClick={() => setShowAddGoalModal(true)}
+                className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium inline-flex items-center space-x-2"
+              >
                 <Plus className="w-4 h-4" />
                 <span>Create Goal</span>
               </button>
@@ -427,6 +574,220 @@ const Dashboard = () => {
           <Plus className="w-6 h-6" />
         </button>
       </main>
+
+      {/* Add Goal Modal */}
+      {showAddGoalModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-slate-900">Create New Goal</h2>
+              <button
+                onClick={closeGoalModal}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddGoalSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Goal Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g., Summer Vacation"
+                  value={goalFormData.name}
+                  onChange={(e) => setGoalFormData({ ...goalFormData, name: e.target.value })}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Category</label>
+                <div className="grid grid-cols-6 gap-3">
+                  {goalCategories.map((cat) => {
+                    const Icon = cat.icon;
+                    return (
+                      <button
+                        key={cat.value}
+                        type="button"
+                        onClick={() => handleCategorySelect(cat.value)}
+                        className={`flex flex-col items-center justify-center p-3 border-2 rounded-lg hover:border-slate-900 transition-all ${
+                          selectedCategory === cat.value
+                            ? 'border-slate-900 bg-slate-50'
+                            : 'border-slate-200'
+                        }`}
+                      >
+                        <Icon className="w-5 h-5" />
+                        <span className="text-xs mt-1">{cat.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Target Amount
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">
+                      ₹
+                    </span>
+                    <input
+                      type="number"
+                      placeholder="10,000"
+                      value={goalFormData.targetAmount}
+                      onChange={(e) => setGoalFormData({ ...goalFormData, targetAmount: e.target.value })}
+                      className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Current Amount
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">
+                      ₹
+                    </span>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      value={goalFormData.currentAmount}
+                      onChange={(e) => setGoalFormData({ ...goalFormData, currentAmount: e.target.value })}
+                      className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Target Date</label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="date"
+                    value={goalFormData.deadline}
+                    onChange={(e) => setGoalFormData({ ...goalFormData, deadline: e.target.value })}
+                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Description (Optional)
+                </label>
+                <textarea
+                  placeholder="Add notes about your goal..."
+                  rows="3"
+                  value={goalFormData.description}
+                  onChange={(e) => setGoalFormData({ ...goalFormData, description: e.target.value })}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none resize-none"
+                />
+              </div>
+
+              <div className="flex space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={closeGoalModal}
+                  className="flex-1 px-6 py-3 border border-slate-300 rounded-lg hover:bg-slate-50 font-medium text-slate-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium"
+                >
+                  Create Goal
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Contribution Modal */}
+      {showContributionModal && selectedGoal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-slate-900">Add Contribution</h2>
+              <button
+                onClick={closeContributionModal}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 mb-4">
+                <div className="font-medium text-slate-900">{selectedGoal.name}</div>
+                <div className="text-sm text-slate-500 mt-1">
+                  Current: ₹{selectedGoal.current?.toLocaleString() || selectedGoal.currentAmount?.toLocaleString() || 0} / ₹
+                  {selectedGoal.target?.toLocaleString() || selectedGoal.targetAmount?.toLocaleString() || 0}
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleContributionSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Amount</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    placeholder="500"
+                    value={contributionAmount}
+                    onChange={(e) => setContributionAmount(e.target.value)}
+                    className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none text-xl font-bold"
+                    required
+                    min="1"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Note (Optional)
+                </label>
+                <textarea
+                  placeholder="Add a note for this contribution..."
+                  rows="3"
+                  value={contributionNote}
+                  onChange={(e) => setContributionNote(e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 outline-none resize-none"
+                />
+              </div>
+
+              <div className="flex space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={closeContributionModal}
+                  className="flex-1 px-6 py-3 border border-slate-300 rounded-lg hover:bg-slate-50 font-medium text-slate-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium"
+                >
+                  Add Contribution
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

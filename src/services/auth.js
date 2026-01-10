@@ -22,7 +22,14 @@ export const authService = {
 
       return response.data;
     } catch (error) {
-      throw error.response?.data || error.message;
+      // Extract error message from backend response
+      const errorData = error.response?.data;
+      if (errorData) {
+        // Backend returns either 'message' or 'error' field
+        const errorMessage = errorData.message || errorData.error || 'Login failed. Please try again.';
+        throw new Error(errorMessage);
+      }
+      throw new Error(error.message || 'Login failed. Please try again.');
     }
   },
 
@@ -46,7 +53,14 @@ export const authService = {
 
       return response.data;
     } catch (error) {
-      throw error.response?.data || error.message;
+      // Extract error message from backend response
+      const errorData = error.response?.data;
+      if (errorData) {
+        // Backend returns either 'message' or 'error' field, and sometimes 'status' instead of 'success'
+        const errorMessage = errorData.message || errorData.error || 'Registration failed. Please try again.';
+        throw new Error(errorMessage);
+      }
+      throw new Error(error.message || 'Registration failed. Please try again.');
     }
   },
 
@@ -75,7 +89,12 @@ export const authService = {
       const response = await api.post(API_ENDPOINTS.FORGOT_PASSWORD, { email });
       return response.data;
     } catch (error) {
-      throw error.response?.data || error.message;
+      const errorData = error.response?.data;
+      if (errorData) {
+        const errorMessage = errorData.message || errorData.error || 'Failed to send reset email. Please try again.';
+        throw new Error(errorMessage);
+      }
+      throw new Error(error.message || 'Failed to send reset email. Please try again.');
     }
   },
 
@@ -92,7 +111,12 @@ export const authService = {
       });
       return response.data;
     } catch (error) {
-      throw error.response?.data || error.message;
+      const errorData = error.response?.data;
+      if (errorData) {
+        const errorMessage = errorData.message || errorData.error || 'Failed to reset password. Please try again.';
+        throw new Error(errorMessage);
+      }
+      throw new Error(error.message || 'Failed to reset password. Please try again.');
     }
   },
 
@@ -105,7 +129,12 @@ export const authService = {
       const response = await api.post(API_ENDPOINTS.VERIFY_EMAIL, { token });
       return response.data;
     } catch (error) {
-      throw error.response?.data || error.message;
+      const errorData = error.response?.data;
+      if (errorData) {
+        const errorMessage = errorData.message || errorData.error || 'Failed to verify email. Please try again.';
+        throw new Error(errorMessage);
+      }
+      throw new Error(error.message || 'Failed to verify email. Please try again.');
     }
   },
 

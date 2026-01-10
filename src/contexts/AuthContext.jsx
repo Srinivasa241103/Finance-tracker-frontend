@@ -13,15 +13,23 @@ export const AuthProvider = ({ children }) => {
   // Initialize auth state on mount
   useEffect(() => {
     const initAuth = () => {
-      const currentUser = authService.getCurrentUser();
-      const isAuth = authService.isAuthenticated();
+      try {
+        const currentUser = authService.getCurrentUser();
+        const isAuth = authService.isAuthenticated();
 
-      if (isAuth && currentUser) {
-        setUser(currentUser);
-        setIsAuthenticated(true);
+        if (isAuth && currentUser) {
+          setUser(currentUser);
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        // Clear potentially corrupted data
+        localStorage.removeItem('financeflow_access_token');
+        localStorage.removeItem('financeflow_refresh_token');
+        localStorage.removeItem('financeflow_user_data');
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     initAuth();
@@ -38,6 +46,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       return { success: true, data };
     } catch (error) {
+      // authService.login now throws an Error object with the message from backend
       return {
         success: false,
         error: error.message || 'Login failed. Please try again.',
@@ -56,6 +65,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       return { success: true, data };
     } catch (error) {
+      // authService.register now throws an Error object with the message from backend
       return {
         success: false,
         error: error.message || 'Registration failed. Please try again.',
